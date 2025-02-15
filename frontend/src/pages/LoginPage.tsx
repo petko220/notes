@@ -1,9 +1,8 @@
+import notebook from "../assets/notebook.jpg"
 import {
   Avatar,
   Button,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Link,
   Box,
   Typography,
@@ -14,7 +13,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { useLoginForm } from "../hooks/useLoginForm";
+import { useLoginForm } from "../hooks/userLoginForm";
 
 const LoginPage = () => {
   const { register, handleSubmit, onSubmit, errors, loading, snackbar, setSnackbar } = useLoginForm();
@@ -28,8 +27,9 @@ const LoginPage = () => {
         sm={6}
         md={7}
         sx={{
-          backgroundImage: "url(https://source.unsplash.com/random/900x900/?notes,productivity)",
+          backgroundImage: `url(${notebook})`,
           backgroundRepeat: "no-repeat",
+          color: "white",
           backgroundSize: "cover",
           backgroundPosition: "center",
           display: "flex",
@@ -40,12 +40,20 @@ const LoginPage = () => {
           textAlign: "center",
         }}
       >
-        <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2 }}>
-          Welcome to NotesApp 📝
-        </Typography>
-        <Typography variant="h6" sx={{ maxWidth: 500, mb: 3 }}>
-          Organize your thoughts and ideas with ease. Manage your notes securely and efficiently.
-        </Typography>
+        <div
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.7)", // Black with 70% opacity
+            borderRadius: "16px", // Rounded corners
+            padding: "20px", // Adds padding for spacing
+          }}
+        >
+          <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2, color: "white" }}>
+            Welcome to NotesApp 📝
+          </Typography>
+          <Typography variant="h6" sx={{ maxWidth: 500, mb: 3, color: "white" }}>
+            Organize your thoughts and ideas with ease. Manage your notes securely and efficiently.
+          </Typography>
+        </div>
       </Grid>
 
       {/* Right Side - Login Form */}
@@ -84,8 +92,6 @@ const LoginPage = () => {
               helperText={errors.password?.message}
             />
 
-            {/* Remember Me Checkbox */}
-            <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
 
             {/* Submit Button */}
             <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} type="submit" disabled={loading}>

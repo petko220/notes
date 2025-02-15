@@ -1,10 +1,8 @@
-import { useState } from "react";
+import notebook from "../assets/notebook.jpg"
 import {
   Avatar,
   Button,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Link,
   Box,
   Typography,
@@ -12,50 +10,13 @@ import {
   Snackbar,
   CircularProgress,
   Alert,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
 } from "@mui/material";
-import Grid from "@mui/material/Grid"; // Using Grid from MUI
+import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useRegisterForm } from "../hooks/userRegisterForm";
 
 const RegisterPage = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
-  const navigate = useNavigate();
-
-  const handleRegister = async () => {
-    setLoading(true);
-    setSnackbar({ open: false, message: "", severity: "success" });
-
-    try {
-      await axios.post("http://localhost:5000/api/auth/register", {
-        name,
-        email,
-        password,
-      });
-
-      setSnackbar({ open: true, message: "Registration successful! Redirecting...", severity: "success" });
-
-      setTimeout(() => navigate("/login"), 1500);
-    } catch (error) {
-      setSnackbar({ open: true, message: "Registration failed. Please try again.", severity: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { register, handleSubmit, onSubmit, errors, loading, snackbar, setSnackbar } = useRegisterForm();
 
   return (
     <Grid container component="main" sx={{ height: "100vh", overflow: "hidden" }}>
@@ -66,7 +27,8 @@ const RegisterPage = () => {
         sm={6}
         md={7}
         sx={{
-          backgroundImage: "url(https://source.unsplash.com/random/900x900/?productivity,writing)",
+          backgroundImage: `url(${notebook})`,
+          color: "white",
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -78,35 +40,24 @@ const RegisterPage = () => {
           textAlign: "center",
         }}
       >
-        <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2 }}>
-          Join NotesApp Today 📝
-        </Typography>
-        <Typography variant="h6" sx={{ maxWidth: 500, mb: 3 }}>
-          Create, manage, and organize your notes efficiently. Get started now and experience seamless note-taking.
-        </Typography>
-        <List>
-          {["Fast & Easy", "Cloud Sync", "100% Secure", "Customizable"].map((text) => (
-            <ListItem key={text}>
-              <ListItemIcon>
-                <CheckCircleOutlineIcon sx={{ color: "white" }} />
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
+        <div
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.7)", // Black with 70% opacity
+            borderRadius: "16px", // Rounded corners
+            padding: "20px", // Adds padding for spacing
+          }}>
+          <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2 }}>
+            Join NotesApp Today 📝
+          </Typography>
+          <Typography variant="h6" sx={{ maxWidth: 500, mb: 3 }}>
+            Create, manage, and organize your notes efficiently. Get started now and experience seamless note-taking.
+          </Typography>
+        </div>
       </Grid>
 
       {/* Right Side - Register Form */}
       <Grid item xs={12} sm={6} md={5} component={Paper} elevation={6} square>
-        <Box
-          sx={{
-            my: 8,
-            mx: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <Box sx={{ my: 8, mx: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
             <LockOutlinedIcon />
           </Avatar>
@@ -114,38 +65,50 @@ const RegisterPage = () => {
             Sign Up
           </Typography>
 
-          <Box component="form" noValidate sx={{ mt: 1 }}>
+          {/* Form with react-hook-form */}
+          <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit(onSubmit)}>
+            {/* Name Input */}
             <TextField
               margin="normal"
-              required
               fullWidth
               label="Full Name"
               autoComplete="name"
               autoFocus
-              onChange={(e) => setName(e.target.value)}
+              {...register("name")}
+              error={!!errors.name}
+              helperText={errors.name?.message}
             />
+
+            {/* Email Input */}
             <TextField
               margin="normal"
-              required
               fullWidth
               label="Email Address"
               autoComplete="email"
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
+              error={!!errors.email}
+              helperText={errors.email?.message}
             />
+
+            {/* Password Input */}
             <TextField
               margin="normal"
-              required
               fullWidth
               label="Password"
               type="password"
               autoComplete="new-password"
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
+              error={!!errors.password}
+              helperText={errors.password?.message}
             />
-            <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="I agree to the terms and conditions" />
-            <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} onClick={handleRegister} disabled={loading}>
+
+            {/* Submit Button */}
+            <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} type="submit" disabled={loading}>
               {loading ? <CircularProgress size={24} /> : "Sign Up"}
             </Button>
-            <Box display="flex" justifyContent="space-between">
+
+            {/* Already have an account? */}
+            <Box display="flex" justifyContent="center">
               <Link href="/login" variant="body2">
                 {"Already have an account? Sign in"}
               </Link>
@@ -154,7 +117,7 @@ const RegisterPage = () => {
         </Box>
       </Grid>
 
-      {/* Snackbar for messages */}
+      {/* Snackbar for Messages */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
