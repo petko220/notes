@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import noteRoutes from "./routes/noteRoutes";
+import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
 
@@ -9,7 +10,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
-app.use("/api", noteRoutes);
+app.use("/api/auth", noteRoutes);
+app.use('/api', authRoutes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
