@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Avatar,
   Button,
@@ -12,48 +11,13 @@ import {
   Snackbar,
   CircularProgress,
   Alert,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
 } from "@mui/material";
-import Grid from "@mui/material/Grid"; // Use standard Grid
+import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLoginForm } from "../hooks/useLoginForm";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
-  const navigate = useNavigate();
-
-  const handleLogin = async () => {
-    setLoading(true);
-    setSnackbar({ open: false, message: "", severity: "success" });
-
-    try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
-      localStorage.setItem("token", response.data.token);
-      setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
-
-      setTimeout(() => navigate("/notes"), 1500);
-    } catch (error) {
-      setSnackbar({ open: true, message: "Invalid credentials. Try again.", severity: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { register, handleSubmit, onSubmit, errors, loading, snackbar, setSnackbar } = useLoginForm();
 
   return (
     <Grid container component="main" sx={{ height: "100vh", overflow: "hidden" }}>
@@ -72,7 +36,6 @@ const LoginPage = () => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          color: "black",
           padding: 4,
           textAlign: "center",
         }}
@@ -83,29 +46,11 @@ const LoginPage = () => {
         <Typography variant="h6" sx={{ maxWidth: 500, mb: 3 }}>
           Organize your thoughts and ideas with ease. Manage your notes securely and efficiently.
         </Typography>
-        <List>
-          {["Secure & Private", "Easy Note Management", "Fast & Reliable"].map((text) => (
-            <ListItem key={text}>
-              <ListItemIcon>
-                <CheckCircleOutlineIcon sx={{ color: "white" }} />
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
       </Grid>
 
       {/* Right Side - Login Form */}
       <Grid item xs={12} sm={6} md={5} component={Paper} elevation={6} square>
-        <Box
-          sx={{
-            my: 8,
-            mx: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <Box sx={{ my: 8, mx: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
             <LockOutlinedIcon />
           </Avatar>
@@ -113,29 +58,41 @@ const LoginPage = () => {
             Sign in
           </Typography>
 
-          <Box component="form" noValidate sx={{ mt: 1 }}>
+          {/* Form with react-hook-form */}
+          <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit(onSubmit)}>
+            {/* Email Input */}
             <TextField
               margin="normal"
-              required
               fullWidth
               label="Email Address"
               autoComplete="email"
               autoFocus
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
+              error={!!errors.email}
+              helperText={errors.email?.message}
             />
+
+            {/* Password Input */}
             <TextField
               margin="normal"
-              required
               fullWidth
               label="Password"
               type="password"
               autoComplete="current-password"
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
+              error={!!errors.password}
+              helperText={errors.password?.message}
             />
+
+            {/* Remember Me Checkbox */}
             <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
-            <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} onClick={handleLogin} disabled={loading}>
+
+            {/* Submit Button */}
+            <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} type="submit" disabled={loading}>
               {loading ? <CircularProgress size={24} /> : "Sign In"}
             </Button>
+
+            {/* Forgot Password / Register Links */}
             <Box display="flex" justifyContent="center">
               <Link href="/register" variant="body2">
                 {"Don't have an account? Sign Up"}
@@ -145,7 +102,7 @@ const LoginPage = () => {
         </Box>
       </Grid>
 
-      {/* Snackbar for messages */}
+      {/* Snackbar for Messages */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
