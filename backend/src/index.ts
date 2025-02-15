@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import noteRoutes from "./routes/noteRoutes";
 import authRoutes from "./routes/authRoutes";
+import { setupSwagger } from "./config/swagger";
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use('/api', noteRoutes);
 
+setupSwagger(app);
+
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ error: err.message });
@@ -20,4 +23,5 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Documentation at http://localhost:${PORT}/api-docs`);
 });
