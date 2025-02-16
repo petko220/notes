@@ -11,10 +11,12 @@ import {
   Button,
   Fab,
   Tooltip,
+  Box,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import NotesList from "../components/NotesList";
+import LogoutButton from "../components/LogoutButton";
 import { fetchNotes, deleteNote } from "../api/noteService";
 
 const NotesPage = () => {
@@ -76,20 +78,25 @@ const NotesPage = () => {
 
   return (
     <Container sx={{ mt: 4, position: "relative" }}>
-      <Typography variant="h4" fontWeight="bold" sx={{ textAlign: "center", mb: 3 }}>
-        Your Notes
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" fontWeight="bold">
+          Your Notes
+        </Typography>
+        <LogoutButton />
+      </Box>
 
-      {loading ? <CircularProgress sx={{ display: "block", mx: "auto" }} /> : <NotesList notes={notes} onDelete={(id) => setDeleteDialog({ open: true, noteId: id })} />}
+      {loading ? (
+        <CircularProgress sx={{ display: "block", mx: "auto" }} />
+      ) : (
+        <NotesList notes={notes} onDelete={(id) => setDeleteDialog({ open: true, noteId: id })} />
+      )}
 
-      {/* Floating Action Button for Adding a New Note */}
       <Tooltip title="Add Note">
         <Fab color="primary" sx={{ position: "fixed", bottom: 20, right: 20 }} onClick={() => navigate("/notes/create")}>
           <Add />
         </Fab>
       </Tooltip>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, noteId: null })}>
         <DialogTitle>Are you sure you want to delete this note?</DialogTitle>
         <DialogActions>
@@ -100,7 +107,6 @@ const NotesPage = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar for Notifications */}
       <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
         <Alert severity={snackbar.severity} variant="filled">{snackbar.message}</Alert>
       </Snackbar>

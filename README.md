@@ -118,3 +118,94 @@ http://localhost:5000/api-docs
 
 
 
+
+
+
+
+# Notes App - Frontend Documentation
+
+## Overview
+This is the **frontend** of the Notes App, a React-based web application built using **Vite, TypeScript, Material UI, and React Router**. It allows users to create, edit, delete, and manage personal notes. Authentication is implemented to ensure user data security.
+
+---
+
+
+## 🛠️ Technologies Used
+- **React** (Frontend library)
+- **TypeScript** (Static typing)
+- **Vite** (Frontend tooling)
+- **Material UI** (UI framework)
+- **React Router** (Navigation)
+- **React Hook Form** (Form management)
+- **Yup** (Form validation)
+- **Axios** (HTTP requests handling)
+
+---
+
+## 🔗 API Integration
+The frontend communicates with the backend through API services located in `src/api/`. Below are the main API calls:
+
+### **Authentication (`authService.ts`):**
+- `loginUser(email, password)`: Logs in a user and stores a token.
+- `registerUser(name, email, password)`: Registers a new user.
+- `logoutUser()`: Logs out a user by removing the token.
+- `isAuthenticated()`: Checks if the user is logged in.
+
+### **Notes API (`noteService.ts`):**
+- `fetchNotes(token)`: Retrieves all notes.
+- `createNote(token, title, content)`: Creates a new note.
+- `updateNote(token, id, title, content)`: Updates an existing note.
+- `deleteNote(token, id)`: Deletes a note.
+
+---
+
+## 🏗️ Features
+### **Authentication**
+✅ User registration and login.  
+✅ Token-based authentication.  
+✅ Logout functionality.
+
+### **Notes Management**
+✅ Create new notes.  
+✅ Edit existing notes.  
+✅ Delete notes.  
+✅ View a list of all saved notes.  
+✅ Floating action button for quick note creation.
+
+### **User Experience**
+✅ Material UI theming and responsiveness.  
+✅ Form validation using **Yup** and **React Hook Form**.  
+✅ Snackbar notifications for feedback.  
+✅ Dialog confirmation for delete actions.
+
+---
+
+## 🚀 Running the Project
+### **1️⃣ Install Dependencies**
+
+npm install
+```
+
+### **2️⃣ Start the Development Server**
+```sh
+npm run dev
+```
+The app should now be available at **http://localhost:5173**
+
+
+## 🔄 Navigation & Routing
+The app uses **React Router** for navigation.
+
+| Route             | Description                        | Access   |
+|------------------|--------------------------------|----------|
+| `/`              | Home Page                        | Public   |
+| `/login`         | User login page                 | Public   |
+| `/register`      | User registration page          | Public   |
+| `/notes`         | Main notes page                 | Private  |
+| `/notes/create`  | Page for creating a new note    | Private  |
+| `/notes/edit/:id`| Page for editing a specific note | Private  |
+
+🔒 **Private routes** are only accessible to authenticated users.
+
+
+
