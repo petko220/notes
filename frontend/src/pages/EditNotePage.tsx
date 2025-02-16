@@ -1,95 +1,56 @@
 import { useState, useEffect } from "react";
-import {
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Snackbar,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
-import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { fetchNotes, updateNote } from "../api/noteService";
+import { Note } from "../types/note"; 
+import NoteForm from "../components/NotesForm";
+
+import { CircularProgress, Container } from "@mui/material";
 
 const EditNotePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const [noteData, setNoteData] = useState<Note | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNote = async () => {
+    const loadNote = async () => {
       const token = localStorage.getItem("token");
-      if (!token) {
-        setSnackbar({ open: true, message: "Unauthorized: No token found", severity: "error" });
-        return;
-      }
+      if (!token) throw new Error("Unauthorized");
 
       try {
-        const response = await axios.get(`http://localhost:5000/api/notes/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setTitle(response.data.title);
-        setContent(response.data.content);
+        const notes: Note[] = await fetchNotes(token);
+        const noteToEdit = notes.find((note) => note.id.toString() === id);
+
+        if (noteToEdit) {
+          setNoteData(noteToEdit);
+        }
       } catch (error) {
-        setSnackbar({ open: true, message: "Failed to load note", severity: "error" });
+        console.error("Failed to load note:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchNote();
+    loadNote();
   }, [id]);
 
-  const handleUpdateNote = async () => {
-    setLoading(true);
-    setSnackbar({ open: false, message: "", severity: "success" });
-
+  const handleUpdate = async (data: { title: string; content: string }) => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      setSnackbar({ open: true, message: "Unauthorized: No token found", severity: "error" });
-      setLoading(false);
-      return;
-    }
+    if (!token) throw new Error("Unauthorized");
 
-    try {
-      await axios.put(
-        `http://localhost:5000/api/notes/${id}`,
-        { title, content },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setSnackbar({ open: true, message: "Note updated successfully!", severity: "success" });
-      setTimeout(() => navigate("/notes"), 1500);
-    } catch (err: any) {
-      setSnackbar({ open: true, message: "Failed to update note", severity: "error" });
-    } finally {
-      setLoading(false);
-    }
+    await updateNote(token, id!, data.title, data.content); // ✅ Use updateNote instead of createNote
+    navigate("/notes");
   };
 
-  return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>
-        Edit Note
-      </Typography>
+  if (loading) {
+    return (
+      <Container sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
-      <TextField label="Title" fullWidth margin="normal" variant="outlined" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <TextField label="Content" fullWidth multiline rows={4} margin="normal" variant="outlined" value={content} onChange={(e) => setContent(e.target.value)} />
-      <Button variant="contained" color="primary" fullWidth onClick={handleUpdateNote} disabled={loading}>
-        {loading ? <CircularProgress size={24} /> : "Update Note"}
-      </Button>
-
-      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Container>
-  );
+  return noteData ? <NoteForm initialData={noteData} onSubmit={handleUpdate} /> : <p>Note not found</p>;
 };
 
 export default EditNotePage;

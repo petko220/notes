@@ -16,6 +16,7 @@ import { Add } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import NotesList from "../components/NotesList";
 import { fetchNotes, deleteNote } from "../api/noteService";
+
 const NotesPage = () => {
   const [notes, setNotes] = useState<{ id: number; title: string; content: string }[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
