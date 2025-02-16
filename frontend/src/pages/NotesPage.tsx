@@ -2,25 +2,20 @@ import { useState, useEffect } from "react";
 import {
   Container,
   Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
   CircularProgress,
   Snackbar,
   Alert,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogActions,
+  Button,
   Fab,
   Tooltip,
 } from "@mui/material";
-import { Delete, Edit, Add } from "@mui/icons-material";
-import axios from "axios";
+import { Add } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-
+import NotesList from "../components/NotesList";
+import { fetchNotes, deleteNote } from "../api/noteService";
 const NotesPage = () => {
   const [notes, setNotes] = useState<{ id: number; title: string; content: string }[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -36,7 +31,7 @@ const NotesPage = () => {
 
   const navigate = useNavigate();
 
-  const fetchNotes = async () => {
+  const loadNotes = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setSnackbar({ open: true, message: "Unauthorized: No token found", severity: "error" });
@@ -45,10 +40,8 @@ const NotesPage = () => {
     }
 
     try {
-      const response = await axios.get("http://localhost:5000/api/notes", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setNotes(response.data);
+      const data = await fetchNotes(token);
+      setNotes(data);
     } catch (err: any) {
       setSnackbar({ open: true, message: "Failed to load notes", severity: "error" });
     } finally {
@@ -66,9 +59,7 @@ const NotesPage = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/notes/${deleteDialog.noteId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await deleteNote(token, deleteDialog.noteId);
       setNotes(notes.filter((note) => note.id !== deleteDialog.noteId));
       setSnackbar({ open: true, message: "Note deleted successfully", severity: "success" });
     } catch (error) {
@@ -79,7 +70,7 @@ const NotesPage = () => {
   };
 
   useEffect(() => {
-    fetchNotes();
+    loadNotes();
   }, []);
 
   return (
@@ -88,42 +79,11 @@ const NotesPage = () => {
         Your Notes
       </Typography>
 
-      {loading ? (
-        <CircularProgress sx={{ display: "block", mx: "auto" }} />
-      ) : (
-        <Grid container spacing={3}>
-          {notes.map((note) => (
-            <Grid item xs={12} sm={6} md={4} key={note.id}>
-              <Card sx={{ transition: "0.3s", "&:hover": { boxShadow: 6 } }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold">
-                    {note.title}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                    {note.content.length > 100 ? note.content.substring(0, 100) + "..." : note.content}
-                  </Typography>
-                </CardContent>
-                <CardActions sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <IconButton color="primary" onClick={() => navigate(`/notes/edit/${note.id}`)}>
-                    <Edit />
-                  </IconButton>
-                  <IconButton color="error" onClick={() => setDeleteDialog({ open: true, noteId: note.id })}>
-                    <Delete />
-                  </IconButton>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      )}
+      {loading ? <CircularProgress sx={{ display: "block", mx: "auto" }} /> : <NotesList notes={notes} onDelete={(id) => setDeleteDialog({ open: true, noteId: id })} />}
 
       {/* Floating Action Button for Adding a New Note */}
       <Tooltip title="Add Note">
-        <Fab
-          color="primary"
-          sx={{ position: "fixed", bottom: 20, right: 20 }}
-          onClick={() => navigate("/notes/create")}
-        >
+        <Fab color="primary" sx={{ position: "fixed", bottom: 20, right: 20 }} onClick={() => navigate("/notes/create")}>
           <Add />
         </Fab>
       </Tooltip>
@@ -140,15 +100,8 @@ const NotesPage = () => {
       </Dialog>
 
       {/* Snackbar for Notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
+        <Alert severity={snackbar.severity} variant="filled">{snackbar.message}</Alert>
       </Snackbar>
     </Container>
   );
