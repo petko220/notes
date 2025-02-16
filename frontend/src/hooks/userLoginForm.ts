@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState} from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "../validation/loginSchema";
-import axios from "axios";
+import { loginUser } from "../api/authService";
 import { useNavigate } from "react-router-dom";
 
 export const useLoginForm = () => {
@@ -20,17 +20,15 @@ export const useLoginForm = () => {
     formState: { errors },
   } = useForm({ resolver: yupResolver(loginSchema) });
 
-  // Handle form submission
   const onSubmit = async (data: { email: string; password: string }) => {
     setLoading(true);
     setSnackbar({ open: false, message: "", severity: "success" });
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", data);
-      localStorage.setItem("token", response.data.token);
-      setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
+      await loginUser(data.email, data.password);
+      setSnackbar({ open: true, message: "Login successful!", severity: "success" });
 
-      setTimeout(() => navigate("/notes"), 1500);
+      navigate("/notes");
     } catch (error) {
       setSnackbar({ open: true, message: "Invalid credentials. Try again.", severity: "error" });
     } finally {
